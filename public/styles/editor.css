@@ -59,6 +59,8 @@ input,button,select{font-family:'Source Sans Pro',sans-serif;outline:0!important
 .to_right .fa{margin-left:1px;}
 .minimize{right:98px;}
 .minimize .fa{margin-top:3px;}
+.bar .save{right:122px;}
+.bar .save .fa{margin-top:3px;}
 #tabs li:hover{opacity:0.5;}
 #tabs li:hover .close{display:block;opacity:0.6;}
 .close:hover{opacity:1!important;}
