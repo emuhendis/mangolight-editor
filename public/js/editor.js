@@ -421,7 +421,7 @@ $(document).ready(function(){
     $('#login_form').submit(function(e){
         $.ajax({
             url: base_url + 'functions/check_logged.php',
-            data:  $(this).serialize(),
+            data: $(this).serialize(),
             type: 'POST',
             dataType: 'json',
             success: function(data){
