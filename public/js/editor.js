@@ -412,11 +412,16 @@ $(document).ready(function(){
         });
         e.stopPropagation();
     });
+	
+	$(document).on('click','.bar .save',function(e){
+        save_file();
+        e.stopPropagation();
+    });
     
     $('#login_form').submit(function(e){
         $.ajax({
             url: base_url + 'functions/check_logged.php',
-            data: $(this).serialize(),
+            data: "login=" + $("input[name='login']").val() + "&password="+md5($("input[name='password']").val()),
             type: 'POST',
             dataType: 'json',
             success: function(data){
@@ -581,8 +586,14 @@ function open_file(site,file){
                 if(data.status=='success'){
                     var id = data.file.site.replace(/[^-A-Za-z0-9]+/g,'_')+'__'+data.file.file.replace(/[^-A-Za-z0-9]+/g,'_');
                     $('#tabs ul').append('<li style="background:'+get_color(data.file.ext)+'" title="'+data.file.site+'://'+data.file.file+'" data-name="'+data.file.name+'" data-file="'+data.file.file+'" data-editor="'+id+'" data-site="'+data.file.site+'">'+data.file.name+'<span title="Close" class="close"><i class="fa fa-times"></i></span></li>');
-                    var bar = $('<div>').addClass('bar').css('background',get_color(data.file.ext)).append($('<div>').addClass('window_title').text(data.file.site+'://'+data.file.file).attr('title',cut_title(data.file.site+'://'+data.file.file))).append($('<span>').addClass('button minimize').html('<i class="fa fa-minus"></i>')).append($('<span>').addClass('button to_left').html('<i class="fa fa-angle-left"></i>').attr('title','Align left')).append($('<span>').addClass('button to_right').html('<i class="fa fa-angle-right"></i>').attr('title','Align right')).append($('<span>').addClass('button maximize').html('<i class="fa fa-plus"></i>').attr('title','Maximize')).append($('<span>').addClass('button close').html('<i class="fa fa-times"></i>').attr('title','Close'));
-                    
+					var bar = $('<div>').addClass('bar').css('background',get_color(data.file.ext)).append($('<div>').addClass('window_title').text(data.file.site+'://'+data.file.file).attr('title',cut_title(data.file.site+'://'+data.file.file)))
+					.append($('<span>').addClass('button save').html('<i class="fa fa-save"></i>'))
+					.append($('<span>').addClass('button minimize').html('<i class="fa fa-minus"></i>'))
+					.append($('<span>').addClass('button to_left').html('<i class="fa fa-angle-left"></i>').attr('title','Align left'))
+					.append($('<span>').addClass('button to_right').html('<i class="fa fa-angle-right"></i>').attr('title','Align right'))
+					.append($('<span>').addClass('button maximize').html('<i class="fa fa-plus"></i>').attr('title','Maximize'))
+					.append($('<span>').addClass('button close').html('<i class="fa fa-times"></i>').attr('title','Close'));
+             
                     if(data.file.ext=='png'||data.file.ext=='jpg'||data.file.ext=='jpeg'||data.file.ext=='gif'||data.file.ext=='ico'){
                         var image = $('<div>').attr('id',id).addClass('content image_viewer').html('<img style="max-width:100%;max-height:100%;" src="data:image/jpg;base64,'+data.file.content+'"/>');
                         $('#editors .container').append($('<div>').addClass('editor').attr('data-file',data.file.file).attr('data-site',data.file.site).append(bar).append(image));
@@ -681,7 +692,7 @@ function open_file(site,file){
     }
 }
 
-function open_browser(url,reload){
+function open_browser(url,reload){F
     var site = 'mangolight_editor_browser';
     if(reload) site += '_reload';
     if($('#tabs li[data-file="'+url+'"][data-site="'+site+'"]').length>0){
@@ -690,7 +701,12 @@ function open_browser(url,reload){
     }else{
         var id = site+url.replace(/[^-A-Za-z0-9]+/g,'_');
         $('#tabs ul').append('<li title="'+url+'" data-name="'+url+'" data-file="'+url+'" data-editor="'+id+'" data-site="'+site+'">'+url+'<span title="Close" class="close"><i class="fa fa-times"></i></span></li>');
-        var bar = $('<div>').addClass('bar').append($('<div>').addClass('window_title').text(url).attr('title',cut_title(url))).append($('<span>').addClass('button minimize').html('<i class="fa fa-minus"></i>')).append($('<span>').addClass('button to_left').html('<i class="fa fa-angle-left"></i>').attr('title','Align left')).append($('<span>').addClass('button to_right').html('<i class="fa fa-angle-right"></i>').attr('title','Align right')).append($('<span>').addClass('button maximize').html('<i class="fa fa-plus"></i>').attr('title','Maximize')).append($('<span>').addClass('button close').html('<i class="fa fa-times"></i>').attr('title','Close'));
+		var bar = $('<div>').addClass('bar').append($('<div>').addClass('window_title').text(url).attr('title',cut_title(url)))
+					.append($('<span>').addClass('button minimize').html('<i class="fa fa-minus"></i>'))
+					.append($('<span>').addClass('button to_left').html('<i class="fa fa-angle-left"></i>').attr('title','Align left'))
+					.append($('<span>').addClass('button to_right').html('<i class="fa fa-angle-right"></i>').attr('title','Align right'))
+					.append($('<span>').addClass('button maximize').html('<i class="fa fa-plus"></i>').attr('title','Maximize'))
+					.append($('<span>').addClass('button close').html('<i class="fa fa-times"></i>').attr('title','Close'));
         var browser = $('<div>').attr('id',id).addClass('content browser').html('<iframe src="'+url+'"></iframe>');
         $('#editors .container').append($('<div>').addClass('editor').attr('data-file',url).attr('data-site',site).append(bar).append(browser));
         
@@ -968,7 +984,7 @@ function save_file(){
         var content = editor.getValue();
         $.ajax({
             url: base_url + 'functions/ftp/save.php',
-            data: {'site':site,'file':file,'content':content},
+            data: {'site':site,'file':file,'content':window.btoa(content)},
             type: 'post',
             dataType: 'json',
             success: function(data){
@@ -1286,9 +1302,16 @@ function save_settings(){
     alert('Please set a login and password.');
     return;
     }
+    set_pass = $("#settings_password").val();
+    if(set_pass!="#########"){
+        $("#settings_password").val(md5(set_pass));
+    }
+    data = $('#settings_form').serialize();
+    console.log(data);
+    
     $.ajax({
        url: base_url + 'functions/save_config.php',
-       data: $('#settings_form').serialize(),
+       data: data,
        type: 'post',
        dataType: 'json',
        success: function(data){
